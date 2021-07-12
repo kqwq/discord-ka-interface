@@ -1,3 +1,5 @@
 node_modules
 config.json
 logins.json
+bot_data.json
+bot_logs.json

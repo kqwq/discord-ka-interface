@@ -13,7 +13,8 @@ module.exports = {
 
     if (!args.length) {
       let helpStr = 'Here\'s a list of my main commands:\n• ';
-      helpStr += commands.map(command => `\`${command.name}\` ` + (command.usage ? (command.usage) : "")).join('\n• ');
+      showCommands = commands.filter(cmd => cmd.ownerOnly != true);
+      helpStr += showCommands.map(command => `\`${command.name}\` ` + (command.usage ? (command.usage) : "")).join('\n• ');
       let embed = new MessageEmbed({
         title: "Commands",
         description: helpStr,
