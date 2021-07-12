@@ -18,6 +18,7 @@
 | Max Vote calls/hr | 1  | 5   | 10  | 15  | 20   | 25   | 30   |
 | ----------------- | -- | --- | --- | --- | ---- | ---- | ---- |
 | KAAS keys         | 500 | 500 | 500 | 750 | 1000 | 1250 | 1500 |
+
 Copy logins.json to under root
 5. Run `npm run start`
 6. Invite to server - `https://discordapp.com/oauth2/authorize?&client_id=BOT_ID_HERE&scope=bot&permissions=0`
