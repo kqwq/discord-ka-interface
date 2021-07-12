@@ -1,0 +1,25 @@
+{
+  "name": "discord-ka-interface",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kqwq/discord-ka-interface.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kqwq/discord-ka-interface/issues"
+  },
+  "homepage": "https://github.com/kqwq/discord-ka-interface#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "fs": "*",
+    "node-fetch": "^2.6.1"
+  }
+}
