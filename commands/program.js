@@ -1,6 +1,32 @@
 const fetch = require("node-fetch");
 const logins = require("../logins");
 const fs = require("fs");
+const { voteByEntityKey } = require("../util/votebatch");
+
+/**
+ * Same as Promise.all(), but it waits for the first {batchSize} promises to finish
+ * before starting the next batch.
+ *
+ * @template A
+ * @template B
+ * @param {function(A): B} task The task to run for each item.
+ * @param {A[]} items Arguments to pass to the task for each call.
+ * @param {int} batchSize
+ * @returns {B[]}
+ */
+async function promiseAllInBatches(task, items, batchSize) {
+  let position = 0;
+  let results = [];
+  while (position < items.length) {
+    const itemsForBatch = items.slice(position, position + batchSize);
+    results = [
+      ...results,
+      ...(await Promise.all(itemsForBatch.map((item) => task(item)))),
+    ];
+    position += batchSize;
+  }
+  return results;
+}
 
 module.exports = {
   name: "program",
@@ -10,24 +36,23 @@ module.exports = {
   usage: "[programId] {amount=100}",
   log: true,
   args: true,
-  execute(msg, [projId, newVotes=100]) {
+  execute(msg, [projId, newVotes = 100]) {
     if (isNaN(newVotes)) return msg.reply("Please enter a valid number.");
     newVotes = parseInt(newVotes);
     if (newVotes > 500) {
       msg.reply("Limit is 500 votes.");
-      newVotes = 500
+      newVotes = 500;
     }
-    let url
+    let url;
     if (projId.includes("https://www.khanacademy.org")) {
-      url = projId
-      projId = url.split("/")[5]
+      url = projId;
+      projId = url.split("/")[5];
     } else {
       url = `https://www.khanacademy.org/cs/i/${projId}`;
     }
     msg.channel.send(`${msg.author.username} is voting this program ${url}`);
 
     (async () => {
-
       // Get entity key
       let baseUrl = "https://www.khanacademy.org/api/internal";
       let res = await fetch(
@@ -40,49 +65,7 @@ module.exports = {
       let entity = await res.json();
       let entity_key = entity.key;
 
-      // Update total votes
-      let bot_data = JSON.parse(fs.readFileSync("./bot_data.json"));
-      bot_data.votes += parseInt(bot_data.votes) + newVotes;
-      fs.writeFileSync("./bot_data.json", JSON.stringify(bot_data));
-
-      // Update message every 2 seconds with progress bar
-      let i = 0;
-      let myMsg = msg.channel.send("Loading...")
-      const updateProgress = () => {
-        myMsg.then(m => {
-          let len = 40
-          let ratioFinished = i / newVotes
-          let progressDots = "█".repeat(Math.floor(ratioFinished * len)) + ".".repeat(len - Math.floor(ratioFinished * len));
-          m.edit(`Progress: \`[${progressDots}]\` ${i}/${newVotes} (${(ratioFinished*100).toFixed(1)}%)`);
-        })
-      }
-      let updateMessage = setInterval(updateProgress, 1000 * 2);
-
-      // Vote project
-      for (i = 0; i < newVotes; i++) {
-        let { KAAS } = logins[(bot_data.votes + i) % logins.length];
-        let headers = {
-          "content-type": "application/json",
-          "x-ka-fkey": `lol`,
-          cookie: `KAAS=${KAAS}; fkey=lol`,
-        };
-        let res = await fetch(
-          `${baseUrl}/discussions/voteentity?entity_key=${entity_key}&vote_type=1`,
-          {
-            headers: headers,
-            body: ``,
-            method: "POST",
-          }
-        );
-        if (res.status !== 200) {
-          console.log(`Failed to vote proj ${projId}`, res.status, KAAS, new Date());
-        }
-      }
-
-      // Finish
-      updateProgress()
-      clearInterval(updateMessage)
-      msg.channel.send(`Finished`);
+      voteByEntityKey(msg, entity_key, newVotes, 1)
     })();
   },
 };

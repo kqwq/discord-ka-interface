@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 const logins = require("../logins");
-const fs = require("fs");
+const { voteByEntityKey } = require("../util/votebatch");
 
 module.exports = {
   name: "clean",
@@ -12,17 +12,18 @@ module.exports = {
   log: true,
   args: true,
   execute(msg, [projId]) {
-    let url
+    let url;
     if (projId.includes("https://www.khanacademy.org")) {
-      url = projId
-      projId = url.split("/")[5]
+      url = projId;
+      projId = url.split("/")[5];
     } else {
       url = `https://www.khanacademy.org/cs/i/${projId}`;
     }
-    msg.channel.send(`${msg.author.username} is removing all artificial votes from ${url}`);
+    msg.channel.send(
+      `${msg.author.username} is removing all artificial votes from ${url}`
+    );
 
     (async () => {
-
       // Get entity key
       let baseUrl = "https://www.khanacademy.org/api/internal";
       let res = await fetch(
@@ -35,44 +36,8 @@ module.exports = {
       let entity = await res.json();
       let entity_key = entity.key;
 
-      // Update message every 2 seconds with progress bar
-      let myMsg = msg.channel.send("Loading...")
-      const updateProgress = () => {
-        myMsg.then(m => {
-          let len = 40
-          let ratioFinished = i / logins.length
-          let progressDots = "█".repeat(Math.floor(ratioFinished * len)) + ".".repeat(len - Math.floor(ratioFinished * len));
-          m.edit(`Progress: \`[${progressDots}]\` ${i}/${logins.length} (${(ratioFinished*100).toFixed(1)}%)`);
-        })
-      }
-      let updateMessage = setInterval(updateProgress, 1000 * 2);
-
-      // Vote project
-      let i = 0
-      for (let { KAAS } of logins) {
-        let headers = {
-          "content-type": "application/json",
-          "x-ka-fkey": `lol`,
-          cookie: `KAAS=${KAAS}; fkey=lol`,
-        };
-        let res = await fetch(
-          `${baseUrl}/discussions/voteentity?entity_key=${entity_key}&vote_type=0`,
-          {
-            headers: headers,
-            body: ``,
-            method: "POST",
-          }
-        );
-        if (res.status !== 200) {
-          console.log(`Failed to vote proj ${projId}`, res.status, KAAS, new Date());
-        }
-        i ++
-      }
-
-      // Finish
-      updateProgress()
-      clearInterval(updateMessage)
-      msg.channel.send(`Finished unvoting`);
+      // Remove every possible vote
+      voteByEntityKey(msg, entity_key, logins.length, 0);
     })();
-  },
+  }
 };
