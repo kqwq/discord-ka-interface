@@ -8,7 +8,7 @@ module.exports = {
   usage: "[kaencrypted] {amount=100}",
   log: true,
   args: true,
-  execute(msg, [kaencrypted, newVotes=100]) {
+  execute(msg, [kaencrypted, newVotes=100, voteDirection=1]) {
     if (isNaN(newVotes)) return msg.reply("Please enter a valid number.");
     newVotes = parseInt(newVotes);
     if (newVotes > 500) {
@@ -17,6 +17,6 @@ module.exports = {
     }
     msg.channel.send(`${msg.author.username} is voting this discussion key: ${kaencrypted}`);
 
-    voteByEntityKey(msg, kaencrypted, newVotes, 1)
+    voteByEntityKey(msg, kaencrypted, newVotes, voteDirection)
   },
 };

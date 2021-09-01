@@ -87,7 +87,7 @@ function voteByEntityKey(msg, entity_key, amount, voteDirection) {// Vote direct
       // Finish
       updateProgress();
       clearInterval(updateMessage);
-      msg.channel.send(`Finished`);
+      msg.channel.send(`Finished - Khan Academy's servers may take a few minutes to update`);
     })
     .catch((err) => {
       // Error

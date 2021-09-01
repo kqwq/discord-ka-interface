@@ -2,6 +2,8 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const { owner, ownerId, prefix, token } = require("./config.json");
 const fs = require("fs");
+const logins = require("./logins");
+console.log(logins.length);
 
 // Create bot data & logs if it doesn't exist
 if (fs.existsSync('./bot_data.json') === false) {

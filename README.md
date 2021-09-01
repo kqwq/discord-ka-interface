@@ -28,6 +28,7 @@ Copy logins.json to under root
 ## Commands
 (owner-only)
 - `reload` - Reload a command
+- `voteall` - Vote KA project maximum number of times
 - `clean [id]` - Remove all artificial votes from a KA project
 - `eval [code]` - Remotely execute code from discord
 
